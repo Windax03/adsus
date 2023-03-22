@@ -30,7 +30,7 @@ do
     else
       echo "$user:$pass" | chpasswd "$user" &>/dev/null
       passwd -x 30 "$user" &>/dev/null
-      usermod -aG "sudo" "$user" &/dev/null
+      usermod -aG "sudo" "$user" &>/dev/null
       echo "$fullname ha sido creado"
     fi
   elif [ "$1" = "-s" ]
