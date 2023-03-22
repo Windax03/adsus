@@ -14,39 +14,42 @@ then
   exit 1
 fi
 
-while IFS=, read -r user pass fullname
-do
-  if [ "$1" = "-a" ]
+if [ "$1" = "-a" ]
+then
+  while IFS=, read -r user pass fullname
+  do
+  if [ -z "$user" -o -z "$pass" -o -z "$fullname" ]
   then
-    if [ -z "$user" -o -z "$pass" -o -z "$fullname" ]
-    then
-      echo "Campo invalido"
-      exit 2
-    fi
-    useradd -c "$fullname" "$user" -m -k /etc/skel -K UID_MIN=1815 -U &>/dev/null
-    if [ $? -ne 0 ]
-    then
-      echo "El usuario $user ya existe"
-    else
-      echo "$user:$pass" | chpasswd "$user" &>/dev/null
-      passwd -x 30 "$user" &>/dev/null
-      usermod -aG "sudo" "$user" &>/dev/null
-      echo "$fullname ha sido creado"
-    fi
-  elif [ "$1" = "-s" ]
-  then
-    if [ ! -d /extra/backup ]
-    then
-      mkdir -p /extra/backup
-    fi
-    dir=$(getent passwd "$user" | cut -d: -f6)
-    tar -cf "/extra/backup/$user".tar -C "$dir" &>/dev/null
-    if [ $? -eq 0 ]
-    then
-      userdel -fr "$user" &>/dev/null
-    fi
-  else
-    echo "Opcion invalida">&2
-    exit 1
+    echo "Campo invalido"
+    exit 2
   fi
-done < $2
+  useradd -c "$fullname" "$user" -m -k /etc/skel -K UID_MIN=1815 -U &>/dev/null
+  if [ $? -ne 0 ]
+  then
+    echo "El usuario $user ya existe"
+  else
+    echo "$user:$pass" | chpasswd "$user" &>/dev/null
+    passwd -x 30 "$user" &>/dev/null
+    usermod -aG "sudo" "$user" &>/dev/null
+    echo "$fullname ha sido creado"
+  fi
+  done <$2
+elif [ "$1" = "-s" ]
+then
+  if [ ! -d /extra/backup ]
+  then
+    mkdir -p /extra/backup
+  fi
+  while IFS=, read -r user pass fullname
+  do
+  dir=$(getent passwd "$user" | cut -d: -f6)
+  tar -cf "/extra/backup/$user".tar tar"$dir" &>/dev/null
+  if [ $? -eq 0 ]
+  then
+    userdel -fr "$user" &>/dev/null
+  fi
+  done<$2
+else
+  echo "Opcion invalida">&2
+  exit 1
+fi
