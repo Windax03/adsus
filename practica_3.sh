@@ -21,17 +21,17 @@ else
                                 echo "Campo invalido"
                                 exit 2
                         fi
-                        useradd -c "$fullname" "$user" -m -k /etc/skel -K UID_MIN=1815 -U &>/dev/null
+                        useradd -c "$fullname" "$user" -m -k /etc/skel -U -K UID_MIN=1815 &>/dev/null
                         if [ $? -ne 0 ]
                         then
                                 echo "El usuario $user ya existe"
                         else
                                 echo "$user:$pass" | chpasswd
-                                passwd -x 30 "$user" &>/dev/null
-                                usermod -aG 'sudo' "$user"
+                                passwd -x 30 $user &>/dev/null
+                                usermod -aG 'sudo' $user
                                 echo "$fullname ha sido creado"
                         fi
-                done <$2
+                done < $2
         elif [ "$1" = "-s" ]
         then
                 if [ ! -d /extra/backup ]
@@ -41,7 +41,7 @@ else
                 while IFS=, read -r user pass fullname
                 do
                         dir=$(getent passwd "$user" | cut -d: -f6)
-                        tar -cf "/extra/backup/$user".tar tar"$dir" &>/dev/null
+                        tar -cf /extra/backup/$user.tar "$dir" &>/dev/null
                         if [ $? -eq 0 ]
                         then
                                 userdel -fr "$user" &>/dev/null
