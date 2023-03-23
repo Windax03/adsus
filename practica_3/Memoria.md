@@ -1,4 +1,6 @@
 # Practica 3
 
-## Autores: Jorge Leris Lacort y Ángel Villanueva Agudo
-## NIPS: 844759
+## Autor: Jorge Leris Lacort
+## NIP: 845647
+## Autor : Ángel Villanueva Agudo
+## NIP: 844759
