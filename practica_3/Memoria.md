@@ -1,8 +1,8 @@
 # Memoria de la practica 3 AS
-Autor: Jorge Leris Lacort
-NIP: 845647
-Autor: Ángel Villanueva Agudo
-NIP: 844759
+Autor: Jorge Leris Lacort\n
+NIP: 845647\n
+Autor: Ángel Villanueva Agudo\n
+NIP: 844759\n
 
 # Script de Bash para crear usuarios y eliminarlos
 
