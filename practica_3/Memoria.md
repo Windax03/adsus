@@ -1,3 +1,9 @@
+# Memoria de la practica 3 AS
+Autor: Jorge Leris Lacort
+NIP: 845647
+Autor: Ángel Villanueva Agudo
+NIP: 844759
+
 # Script de Bash para crear usuarios y eliminarlos
 
 Este script de Bash tiene como objetivo crear y borrar usuarios además de realizar backups de sus directorios. Para ello, se han tomado una serie de decisiones de diseño y se han incluido varias validaciones para asegurar que el script funcione correctamente.
