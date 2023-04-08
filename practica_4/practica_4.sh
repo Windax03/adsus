@@ -8,7 +8,7 @@ then
         exit 1
 fi
 
-if [ $# -ne 2 ]
+if [ $# -ne 3 ]
 then
         echo "Numero incorrecto de parametros"
 else
@@ -37,11 +37,11 @@ else
                                                 ssh -n as@$IP "usermod -aG 'sudo' $user"
                                                 ssh -n as@$IP "echo "$fullname ha sido creado""
                                         fi
-                                done < $1
+                                done<$2
                         else
                                 echo "$IP no es accesible"
                         fi
-                done < $2
+                done<$3
         elif [ "$1" = "-s" ]
         then
                 while read -r IP
@@ -58,11 +58,11 @@ else
                                         then
                                                 ssh -n as@$IP "userdel -fr "$user" &>/dev/null"
                                         fi
-                                done < $1
+                                done<$2
                         else
                                 echo "$IP no es accesible"
                         fi
-                done < $2
+                done<$3
         else
                 echo "Opcion invalida">&2
                 exit 1
