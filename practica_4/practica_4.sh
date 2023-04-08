@@ -14,39 +14,55 @@ then
 else
         if [ "$1" = "-a" ]
         then
-                while IFS=, read -r user pass fullname
+                while read -r IP
                 do
-                        if [ -z "$user" -o -z "$pass" -o -z "$fullname" ]
+                        ssh -n as@$IP
+                        if [ $? -eq 0 ]
                         then
-                                echo "Campo invalido"
-                                exit 2
-                        fi
-                        useradd -c "$fullname" "$user" -m -k /etc/skel -U -K UID_MIN=1815 &>/dev/null
-                        if [ $? -ne 0 ]
-                        then
-                                echo "El usuario $user ya existe"
+                                while IFS=, read -r user pass fullname
+                                do
+           
+                                        if [ -z "$user" -o -z "$pass" -o -z "$fullname" ]
+                                        then
+                                                echo "Campo invalido"
+                                                exit 2
+                                        fi
+                                        ssh -n as@$IP "useradd -c "$fullname" "$user" -m -k /etc/skel -U -K UID_MIN=1815 &>/dev/null"
+                                        if [ $? -ne 0 ]
+                                        then
+                                                ssh -n as@$IP "echo "El usuario $user ya existe""
+                                        else
+                                                ssh -n as@$IP "echo "$user:$pass" | chpasswd"
+                                                ssh -n as@$IP "passwd -x 30 $user &>/dev/null"
+                                                ssh -n as@$IP "usermod -aG 'sudo' $user"
+                                                ssh -n as@$IP "echo "$fullname ha sido creado""
+                                        fi
+                                done < $1
                         else
-                                echo "$user:$pass" | chpasswd
-                                passwd -x 30 $user &>/dev/null
-                                usermod -aG 'sudo' $user
-                                echo "$fullname ha sido creado"
+                                echo "$IP no es accesible"
                         fi
                 done < $2
         elif [ "$1" = "-s" ]
         then
-                if [ ! -d /extra/backup ]
-                then
-                        mkdir -p /extra/backup
-                fi
-                while IFS=, read -r user pass fullname
+                while read -r IP
                 do
-                        dir=$(getent passwd "$user" | cut -d: -f6)
-                        tar -cf /extra/backup/$user.tar "$dir" &>/dev/null
+                        ssh -n as@$IP
                         if [ $? -eq 0 ]
                         then
-                                userdel -fr "$user" &>/dev/null
+                                ssh -n as@$IP "[ ! -d /extra/backup ] && mkdir -p /extra/backup"
+                                while IFS=, read -r user pass fullname
+                                do
+                                        dir=$(ssh -n as@$IP getent passwd "$user" | cut -d: -f6)
+                                        ssh -n as@$IP "tar -cf /extra/backup/$user.tar "$dir" &>/dev/null"
+                                        if [ $? -eq 0 ]
+                                        then
+                                                ssh -n as@$IP "userdel -fr "$user" &>/dev/null"
+                                        fi
+                                done < $1
+                        else
+                                echo "$IP no es accesible"
                         fi
-                done<$2
+                done < $2
         else
                 echo "Opcion invalida">&2
                 exit 1
