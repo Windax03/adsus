@@ -2,7 +2,7 @@
 #845647, Leris Lacort, Jorge, M, 3, A
 #844759, Villanueva Agudo, Ángel, M, 3, A
 
-if [ $# -ne 1]
+if [ $# -ne 1 ]
 then
     echo "El script necesita una Ip como parametro"
     exit 1
