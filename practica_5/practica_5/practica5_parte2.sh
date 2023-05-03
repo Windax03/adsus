@@ -17,6 +17,6 @@ then
     ssh -n as@$IP "df -hT"
 
 else
-    echo "$IP no es accesible"
+    echo "$1 no es accesible"
     exit 1
 fi
