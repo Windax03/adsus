@@ -8,7 +8,7 @@ then
     exit 1
 fi
 
-ssh -n as@$IP
+ssh -n as@$1
 if [ $? -eq 0 ]
 then
 
