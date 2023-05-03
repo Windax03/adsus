@@ -12,8 +12,8 @@ ssh -n as@$1
 if [ $? -eq 0 ]
 then
 
-    ssh -n as@$1 "sudo sfdisk –s"
-    ssh -n as@$1 "sudo sfdisk –l"
+    ssh -n as@$1 "sudo sfdisk -s"
+    ssh -n as@$1 "sudo sfdisk -l"
     ssh -n as@$1 "df -hT"
 
 else
