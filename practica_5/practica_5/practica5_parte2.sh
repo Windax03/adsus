@@ -12,9 +12,9 @@ ssh -n as@$1
 if [ $? -eq 0 ]
 then
 
-    ssh -n as@$IP "sfdisk –s"
-    ssh -n as@$IP "sfdisk –l"
-    ssh -n as@$IP "df -hT"
+    ssh -n as@$1 "sfdisk –s"
+    ssh -n as@$1 "sfdisk –l"
+    ssh -n as@$1 "df -hT"
 
 else
     echo "$1 no es accesible"
