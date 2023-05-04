@@ -12,9 +12,9 @@ ssh -n as@$1
 if [ $? -eq 0 ]
 then
 
-    ssh -n as@$1 "sudo sfdisk –s"
+    ssh -n as@$1 "sudo sfdisk -s"
     echo ""
-    ssh -n as@$1 "sudo sfdisk –l | tail -n 3"
+    ssh -n as@$1 "sudo sfdisk -l | tail -n 3"
     echo ""
     ssh -n as@$1 "df -hT"
 
