@@ -50,7 +50,7 @@ Se escribe la tabla en el disco y salimos del entorno fdisk
 sudo parted /dev/sdc set 1 lvm on
 Se usa este comando a continuacion para configurar la partición existente para ser utilizada como un volumen físico para LVM.
 
-Posteriormente hemos creado el script practica5_parte3_vg, antes de ejecutarlo debemos crear el nuevo grupo de volumen mediante el comando sudo vgcreate vg_p5 /dev/sdc1, una vez creado comprobamos que se ha creado el volumen usando el comando sudo vgdisplay el cual muestra los grupos de volumenes del sistema, es necesario desmontar las particiones antes de añadirlas al VG porque LVM requiere que los PVs no estén montados en el sistema.
+Posteriormente hemos creado el script practica5_parte3_vg, antes de ejecutarlo debemos crear el nuevo grupo de volumen mediante el comando sudo vgcreate vg_p5 /dev/sdc1, una vez creado comprobamos que se ha creado el volumen usando el comando sudo vgdisplay el cual muestra los grupos de volumenes del sistema, es necesario desmontar las particiones antes de añadirlas al VG porque LVM requiere que los PVs no estén montados en el sistema, una vez hecho todo esto el script se ejecutara de la forma sudo ./practica5_parte3_vg.sh sdb1 sdb2.
 
 A continuación se procede a desmontar los discos del sistema mediante los comandos sudo umount -l /media y sudo umount -l /var para desmontar los discos actuales, poniendo -l para que se pueda desmontar los discos en segundo plano y permitir que los procesos accedan a el. Se descomentan las lineas de los discos en el fichero /etc/fstab y se ha reiniciado la maquina para ejecutar el script y añadirlo al grupo de volumen, mediante el comando sudo pvdisplay muestra los tres volumenes que se han creado.
 
