@@ -56,4 +56,4 @@ A continuación se procede a desmontar los discos del sistema mediante los coman
 
 Para elimiminar los volumenes creados hay que poner sudo vgreduce vg_p5 /dev/sdb1, posteriormente sudo pvremove /dev/sdb1, si se desea volver a montar los discos habra que crear el sistema de archivos tambien mediante mkfs.
 
-sudo lvremove /dev/mi_grupo_volumenes_mi_volumen
+sudo lvremove /dev/mi_grupo_volumenes_mi_volumen/volumen-logico , con lvdisplay se puede ver informacion de los volumenes logicos.
