@@ -54,4 +54,6 @@ Posteriormente hemos creado el script practica5_parte3_vg, antes de ejecutarlo d
 
 A continuación se procede a desmontar los discos del sistema mediante los comandos sudo umount -l /media y sudo umount -l /var para desmontar los discos actuales, poniendo -l para que se pueda desmontar los discos en segundo plano y permitir que los procesos accedan a el. Se descomentan las lineas de los discos en el fichero /etc/fstab y se ha reiniciado la maquina para ejecutar el script y añadirlo al grupo de volumen, mediante el comando sudo pvdisplay muestra los tres volumenes que se han creado.
 
-Para elmiminar los volumenes creados hay que poner sudo vgreduce vg_p5 /dev/sdb1, posteriormente sudo pvremove /dev/sdb1, si se desea volver a montar los discos habra que crear el sistema de archivos tambien mediante mkfs.
+Para elimiminar los volumenes creados hay que poner sudo vgreduce vg_p5 /dev/sdb1, posteriormente sudo pvremove /dev/sdb1, si se desea volver a montar los discos habra que crear el sistema de archivos tambien mediante mkfs.
+
+sudo lvremove /dev/mi_grupo_volumenes_mi_volumen
