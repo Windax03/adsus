@@ -23,6 +23,29 @@ Es necesario añadir las lineas mostradas con el comando anterior en el archivo 
 
 Para la parte 2 de la practica se ha realizado un script el cual se limita a ejecutar los comandos expuestos en el guion ssh -n as@$1 "sfdisk –s", ssh -n as@$1 "sfdisk –l | tail -n 3" y ssh -n as@$1 "df -hT" donde $1 es la ip que se pasa como parametro al script, ya que este script no se lanza sin el parametro.
 
-Para mostrar la salida que realmente nos interesa usamos sfdisk –l junto a tail para que solo nos enseñe las tres ultimas lineas
+Para mostrar la salida que realmente nos interesa usamos sfdisk –l junto a tail para que solo nos enseñe las tres ultimas lineas.
 
 ## Parte III
+
+Para utilizar lvm, lo instalamos mediante el comando sudo apt install lvm2 y se comprueba que esta instalado mediante systemctl list-units | grep 'lvm2', para comprobar que el servicio esta instalado, con lsblk comprobamos donde esta instalado el disco nuevo, en este caso en el fichero /dev/sdc, posteriormente se usa el
+comando sudo fdisk /dev/sdc mostrando lo siguiente
+Orden (m para obtener ayuda): n
+Tipo de particion
+p primaria
+e extendida
+Seleccionar (valor predeterminado: p): p
+Número de partición: 1
+Primer sector: valor predeterminado
+Ultimo sector: valor predeterminado
+
+Con esto se crea la nueva particion, pero todavia no hemos cambiado el tipo para ello:
+Orden (m para obtener ayuda): t
+Se ha seleccionado la particion 1
+Codigo hexadecimal: 8e
+Se ha cambiado el tipo de la particion "Linux" a "Linux LVM"
+
+Orden (m para obtener ayuda): w
+Se escribe la tabla en el disco y salimos del entorno fdisk
+
+sudo parted /dev/sdc set 1 lvm on
+Se usa este comando a continuacion para configurar la partición existente para ser utilizada como un volumen físico para LVM.
