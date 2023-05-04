@@ -30,8 +30,5 @@ do
     echo "La partición /dev/$PARTITION_NAME se ha añadido correctamente al VG $VG."
 done
 
-# Asignamos el nombre "vg_p5" al VG resultante
-vgrename "$VG" vg_p5
-
 # Mostramos la información del VG resultante
 vgdisplay vg_p5
