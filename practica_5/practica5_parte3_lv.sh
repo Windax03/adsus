@@ -22,8 +22,9 @@ do
     # Asignamos a vldir el directorio del volumen
     vldir=$(echo "/dev/$nombreGrupoVolumen/$nombreVolumenLogico")
     # Miramos si hay coincidencia
-    lvdisplay "$nombreGrupoVolumen/$nombreVolumenLogico" | grep ""$vldir"" &> /dev/null
+    lvdisplay | grep ""$vldir"" &> /dev/null
     # Si el comando anterior se ejecuta con exite el volumen existe en el sistema
+
     if [ $? -eq 0 ]
     then
         
