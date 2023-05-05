@@ -1,1 +1,3 @@
 vg_p5,vl,40MB,ext4,/a
+vg_p5,vl,45MB,ext4,/a
+vg_p5,vg,30MB,ext4,/b
