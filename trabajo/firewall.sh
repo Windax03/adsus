@@ -20,7 +20,7 @@ iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to 192.168.3
 
 # Redirección de peticiones desde el host al servidor web de Apache de debian2 y al servidor ssh de debian5
 iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.20.2:80
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
 
 # Se permite el paso del tráfico hacia la extranet (SSH y servidor web)
 iptables -A FORWARD -i enp0s3 -p all -j ACCEPT
