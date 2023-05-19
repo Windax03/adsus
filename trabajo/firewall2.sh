@@ -16,34 +16,43 @@ iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT ACCEPT
 
-# Reglas para permitir tráfico local
+# Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
 iptables -A INPUT -i lo -j ACCEPT
-iptables -A INPUT -i enp0s9 -j ACCEPT
-iptables -A INPUT -i enp0s10 -j ACCEPT
-
-# Permitir tráfico relacionado y establecido
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-# Permitir a debianX hacer ping entre ellas
-iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
-iptables -A FORWARD -p icmp --icmp-type echo-request -j ACCEPT
+# Permite el acceso a ssh y http (para el servidor web)
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 
-# Bloquear ping desde el Host
-iptables -A INPUT -p icmp --icmp-type echo-request -i enp0s8 -j DROP
+# Permitir el tráfico entre las máquinas debianX
+iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s9 -j ACCEPT
 
-# Permitir SSH desde cualquier origen a debian5
-iptables -A FORWARD -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
-
-# Permitir HTTP desde el Host a debian1
-iptables -A INPUT -p tcp --dport 80 -s 192.168.56.1 -j ACCEPT
-
-# Permitir acceso a Internet para debianX
+# Permitir el tráfico de las máquinas debianX a Internet
 iptables -A FORWARD -i enp0s9 -o enp0s3 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s3 -j ACCEPT
 
-# Configurar NAT para acceso a Internet
+# Permitir el tráfico de las máquinas debianX al Host
+iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
+
+# Habilitar el NAT para las máquinas debianX
 iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
 
-# Guardar reglas iptables
+# Permitir el acceso desde cualquier máquina a debian5 mediante ssh
+iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+
+# Redirección de ssh desde el Host al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
+
+# Permitir el tráfico ICMP desde las máquinas debianX al Host pero bloquear el inverso
+iptables -A FORWARD -i enp0s8 -o enp0s9 -p icmp --icmp-type echo-request -j DROP
+iptables -A FORWARD -i enp0s8 -o enp0s10 -p icmp --icmp-type echo-request -j DROP
+iptables -A FORWARD -i enp0s9 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
+
+# Guardar reglas
 iptables-save > /etc/iptables/rules.v4
