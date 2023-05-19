@@ -47,6 +47,10 @@ iptables -t nat -A PREROUTING -i enp0s9 -p tcp --dport 22 -j DNAT --to-destinati
 # Redirección de las peticiones SSH desde la red Host-Only al servidor ssh de debian5
 iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to-destination 192.168.31.2:22
 
+# Permite las respuestas SSH desde debian5 a la red interna 2 y al host
+iptables -A FORWARD -o enp0s9 -p tcp --sport 22 -s 192.168.31.2 -j ACCEPT
+iptables -A FORWARD -o enp0s8 -p tcp --sport 22 -s 192.168.31.2 -j ACCEPT
+
 # Permite que debian1 responda a los pings generados en la intranet, pero no a los generados desde la máquina Host
 iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -i enp0s10 -p icmp --icmp-type echo-request -j ACCEPT
