@@ -20,6 +20,8 @@ iptables -P FORWARD DROP
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
+
+
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
@@ -32,6 +34,9 @@ iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 iptables -A FORWARD -i enp0s8 -o enp0s8 -d 192.168.32.0/24 -j ACCEPT  # para Debian5
 
+# Redireccionaramos conexion ssh entrante del host al servidor ssh de Debian5
+ptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport ssh -j DNAT --to 192.168.32.2  
+
 # Habilita el NAT para que todas las máquinas debianX puedan acceder a Internet y a la red Host-Only usando la IP pública de debian1
 iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
 
@@ -40,6 +45,9 @@ iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
 iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT  # desde la red host-only
 iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+
+ # Redireccionaramos conexion ssh entrante del host al servidor ssh de Debian5.
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport ssh -j DNAT --to 192.168.32.2
 
 # Permite que debian1 responda a los pings generados en la intranet, pero no a los generados desde la máquina Host
 iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
