@@ -40,6 +40,10 @@ iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
 iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
 
+# Se permite el paso del tráfico hacia la extranet (SSH y servidor web)
+iptables -A FORWARD -i enp0s3 -p all -j ACCEPT
+iptables -A FORWARD -i enp0s8 -p all -j ACCEPT
+
 # Redirección de las peticiones SSH desde la red Host-Only al servidor ssh de debian5
 iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to-destination 192.168.32.2:22
 
