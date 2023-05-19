@@ -38,6 +38,12 @@ iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
 iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT 
 iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.31.2 -j ACCEPT  
 
+# Permite las conexiones SSH desde la red interna 2 a debian5
+iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.31.2 -j ACCEPT
+
+# Redirecciona las peticiones SSH desde la red interna 2 al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s9 -p tcp --dport 22 -j DNAT --to-destination 192.168.31.2:22
+
 # Redirección de las peticiones SSH desde la red Host-Only al servidor ssh de debian5
 iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to-destination 192.168.31.2:22
 
