@@ -27,10 +27,6 @@ iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-# Permite el tráfico interno entre las subredes internas
-iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
-iptables -A FORWARD -i enp0s10 -o enp0s9 -j ACCEPT
-
 # Permitir ping desde las máquinas debianX a Host
 iptables -A FORWARD -i enp0s9 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
