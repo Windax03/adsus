@@ -12,46 +12,31 @@ iptables -t nat -F
 iptables -t mangle -F
 
 # Politicas por defecto
-iptables -P INPUT DROP
+iptables -P INPUT ACCEPT
 iptables -P OUTPUT ACCEPT
-iptables -P FORWARD DROP
+iptables -P FORWARD ACCEPT
 
-# Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
+# Configuración de NAT para acceso a Internet
+iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
+
+# Reglas para permitir tráfico local
 iptables -A INPUT -i lo -j ACCEPT
+
+# Reglas para permitir tráfico de red interna
+iptables -A INPUT -i enp0s8 -j ACCEPT
+iptables -A INPUT -i enp0s9 -j ACCEPT
+iptables -A INPUT -i enp0s10 -j ACCEPT
+
+# Permitir tráfico de red relacionado y existente
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-
-# Permitir ping entre las máquinas Debian, pero no desde el Host
-iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
-iptables -A INPUT -i enp0s10 -p icmp --icmp-type echo-request -j ACCEPT
-iptables -A INPUT -i enp0s8 -p icmp --icmp-type echo-request -j DROP
-
-# Permite el acceso a ssh y http (para el servidor web)
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-
-# Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-# Permitir tráfico de las subredes internas a Internet y al Host
-iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
-iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
+# Bloquear ping desde el host
+iptables -A INPUT -p icmp --icmp-type echo-request -i enp0s3 -j DROP
 
-# Permite las conexiones a debian2 (servidor web) y a debian5 (servidor ssh) desde la red Host-Only y desde la red interna 2
-iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
-iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
-iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
-iptables -A FORWARD -i enp0s10 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+# Redireccionar tráfico SSH y HTTP a debian5 y debian2 respectivamente
+iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to-destination 192.168.32.2:22
+iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to-destination 192.168.30.2:80
 
-# Redirección de peticiones desde el NAT al servidor web de Apache de debian2 y al servidor ssh de debian5
-iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
-iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
-
-# Redirección de peticiones desde el host al servidor web de Apache de debian2 y al servidor ssh de debian5
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
-
-# Habilita el NAT para que todas las máquinas debianX puedan acceder a Internet y a la red Host-Only usando la IP pública de debian1
-iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
-
-# Preservación de las reglas iptables
+# Guardar reglas iptables
 iptables-save > /etc/iptables/rules.v4
