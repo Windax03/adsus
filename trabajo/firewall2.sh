@@ -12,31 +12,36 @@ iptables -t nat -F
 iptables -t mangle -F
 
 # Politicas por defecto
-iptables -P INPUT ACCEPT
+iptables -P INPUT DROP
 iptables -P OUTPUT ACCEPT
-iptables -P FORWARD ACCEPT
-
-# Configuración de NAT para acceso a Internet
-iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
+iptables -P FORWARD DROP
 
 # Reglas para permitir tráfico local
 iptables -A INPUT -i lo -j ACCEPT
 
-# Reglas para permitir tráfico de red interna
-iptables -A INPUT -i enp0s8 -j ACCEPT
-iptables -A INPUT -i enp0s9 -j ACCEPT
-iptables -A INPUT -i enp0s10 -j ACCEPT
-
-# Permitir tráfico de red relacionado y existente
+# Permitir tráfico relacionado y establecido
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-# Bloquear ping desde el host
-iptables -A INPUT -p icmp --icmp-type echo-request -i enp0s3 -j DROP
+# Permitir a debianX hacer ping entre ellas
+iptables -A INPUT -p icmp --icmp-type echo-request -i enp0s9 -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type echo-request -i enp0s10 -j ACCEPT
 
-# Redireccionar tráfico SSH y HTTP a debian5 y debian2 respectivamente
-iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to-destination 192.168.32.2:22
-iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to-destination 192.168.30.2:80
+# Bloquear ping desde el Host
+iptables -A INPUT -p icmp --icmp-type echo-request -i enp0s8 -j DROP
+
+# Permitir SSH desde cualquier origen a debian5
+iptables -A FORWARD -p tcp --dport 22 -d 192.168.32.5 -j ACCEPT
+
+# Permitir HTTP desde el Host a debian1
+iptables -A INPUT -p tcp --dport 80 -s Host_IP -j ACCEPT
+
+# Permitir acceso a Internet para debianX
+iptables -A FORWARD -i enp0s9 -o enp0s3 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s3 -j ACCEPT
+
+# Configurar NAT para acceso a Internet
+iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
 
 # Guardar reglas iptables
 iptables-save > /etc/iptables/rules.v4
