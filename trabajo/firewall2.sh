@@ -35,7 +35,7 @@ iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 iptables -A FORWARD -i enp0s8 -o enp0s8 -d 192.168.32.0/24 -j ACCEPT  # para Debian5
 
 # Redireccionaramos conexion ssh entrante del host al servidor ssh de Debian5
-ptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport ssh -j DNAT --to 192.168.32.2  
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport ssh -j DNAT --to 192.168.32.2  
 
 # Habilita el NAT para que todas las máquinas debianX puedan acceder a Internet y a la red Host-Only usando la IP pública de debian1
 iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
