@@ -25,17 +25,13 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 
-# Permitir el tráfico entre las máquinas debianX
-iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
-iptables -A FORWARD -i enp0s10 -o enp0s9 -j ACCEPT
+# Permitir el tráfico entre las máquinas debianX y debian1
+iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 
 # Permitir el tráfico de las máquinas debianX a Internet
 iptables -A FORWARD -i enp0s9 -o enp0s3 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s3 -j ACCEPT
-
-# Permitir el tráfico de las máquinas debianX al Host
-iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
-iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 
 # Habilitar el NAT para las máquinas debianX
 iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
@@ -53,6 +49,10 @@ iptables -A FORWARD -i enp0s8 -o enp0s9 -p icmp --icmp-type echo-request -j DROP
 iptables -A FORWARD -i enp0s8 -o enp0s10 -p icmp --icmp-type echo-request -j DROP
 iptables -A FORWARD -i enp0s9 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
+
+# Permitir tráfico entre las máquinas debianX
+iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s9 -j ACCEPT
 
 # Guardar reglas
 iptables-save > /etc/iptables/rules.v4
