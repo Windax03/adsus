@@ -16,14 +16,6 @@ iptables -P INPUT DROP
 iptables -P OUTPUT ACCEPT
 iptables -P FORWARD DROP
 
-# Redirección de peticiones desde el NAT al servidor web de Apache de debian2 y al servidor ssh de debian5
-iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
-iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
-
-# Redirección de peticiones desde el host al servidor web de Apache de debian2 y al servidor ssh de debian5
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
-
 # Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
@@ -38,6 +30,18 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 # Permite el tráfico interno entre las subredes internas
 iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s9 -j ACCEPT
+
+# Permitir ping desde las máquinas debianX a Host
+iptables -A FORWARD -i enp0s9 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s8 -p icmp --icmp-type echo-request -j ACCEPT
+
+# Redirección de peticiones desde el NAT al servidor web de Apache de debian2 y al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
+iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
+
+# Redirección de peticiones desde el host al servidor web de Apache de debian2 y al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
 
 # Permite el tráfico de las subredes internas a Internet y al Host
 iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
