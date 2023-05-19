@@ -16,10 +16,12 @@ iptables -P INPUT DROP
 iptables -P OUTPUT ACCEPT
 iptables -P FORWARD DROP
 
-
-# reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
+# Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
+iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 # Permite el tráfico interno entre las subredes internas
 iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
@@ -36,10 +38,9 @@ iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
 iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT 
 iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.31.2 -j ACCEPT  
 
-# ermite que debian1 responda a los pings generados en la intranet, pero no a los generados desde la máquina Host
+# Permite que debian1 responda a los pings generados en la intranet, pero no a los generados desde la máquina Host
 iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -i enp0s10 -p icmp --icmp-type echo-request -j ACCEPT
-
 
 # Preservación de las reglas iptables
 iptables-save > /etc/iptables/rules.v4
