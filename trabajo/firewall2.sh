@@ -35,11 +35,15 @@ iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
 
 # Permite las conexiones a debian2 (servidor web) y a debian5 (servidor ssh) desde la red Host-Only y desde la red interna 2
-iptables -A FORWARD -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
-iptables -A FORWARD -p tcp --dport 22 -d 192.168.31.2 -j ACCEPT
+iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
+iptables -A FORWARD -i enp0s9 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
 
-# Redirección de las peticiones SSH desde la red interna 2 y la red Host-Only al servidor ssh de debian5
-iptables -t nat -A PREROUTING -p tcp --dport 22 -j DNAT --to-destination 192.168.31.2:22
+iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.31.2 -j ACCEPT
+iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.31.2 -j ACCEPT
+
+# Redirección de las peticiones SSH desde la red Host-Only y la red interna 2 al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to-destination 192.168.31.2:22
+iptables -t nat -A PREROUTING -i enp0s9 -p tcp --dport 22 -j DNAT --to-destination 192.168.31.2:22
 
 # Permite que debian1 responda a los pings generados en la intranet, pero no a los generados desde la máquina Host
 iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
