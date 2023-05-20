@@ -21,6 +21,14 @@ iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 # Permite el acceso a ssh
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
+# Permite el acceso a internet desde debian1
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Permite el tráfico saliente a internet desde debian1
+iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
+
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
