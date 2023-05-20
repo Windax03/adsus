@@ -21,6 +21,14 @@ iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 # Permite el acceso a ssh
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
+# Permite el acceso a internet desde debian1
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Permite el tráfico saliente a internet desde debian1
+iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
+
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
@@ -34,9 +42,6 @@ iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 
 # Habilita el NAT para que todas las máquinas debianX puedan acceder a Internet y a la red Host-Only usando la IP pública de debian1
 iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
-iptables -t nat -A POSTROUTING -o enp0s9 -j MASQUERADE
-iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
-iptables -t nat -A POSTROUTING -o enp0s10 -j MASQUERADE
 
 # Permite las conexiones a debian2 (servidor web) y a debian5 (servidor ssh) desde la red Host-Only y desde la red interna 2
 iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
