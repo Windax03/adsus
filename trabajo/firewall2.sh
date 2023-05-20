@@ -13,7 +13,6 @@ iptables -t mangle -F
 
 # Politicas por defecto
 iptables -P INPUT DROP
-iptables -P OUTPUT ACCEPT
 iptables -P FORWARD DROP
 
 # Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
@@ -25,10 +24,6 @@ iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -i enp0s10 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -i enp0s8 -p icmp --icmp-type echo-request -j DROP
 
-# Permite el acceso a ssh y http (para el servidor web)
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
@@ -36,11 +31,9 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s8 -j ACCEPT
 
-# Permite las conexiones a debian2 (servidor web) y a debian5 (servidor ssh) desde la red Host-Only y desde la red interna 2
-iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
-iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
-iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
-iptables -A FORWARD -i enp0s10 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+# Se permite el tráfico hacia debian5 por el puerto 22 (ssh) y hacia debian2 por el puerto 80
+iptables -A FORWARD -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+iptables -A FORWARD -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
 
 # Redirección de peticiones desde el NAT al servidor web de Apache de debian2 y al servidor ssh de debian5
 iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
