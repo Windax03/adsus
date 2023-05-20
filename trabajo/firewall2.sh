@@ -21,6 +21,14 @@ iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 # Permite el acceso a ssh
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
+# Permite el tráfico de las subredes internas adicionales a Internet y al Host
+iptables -A FORWARD -i enp0s9 -o enp0s3 -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s3 -j ACCEPT
+
+# Habilita el NAT para las redes internas adicionales
+iptables -t nat -A POSTROUTING -o enp0s10 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o enp0s9 -j MASQUERADE
+
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
