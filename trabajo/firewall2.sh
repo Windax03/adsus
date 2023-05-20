@@ -14,7 +14,7 @@ iptables -t mangle -F
 # Politicas por defecto
 iptables -P INPUT DROP
 iptables -P OUTPUT ACCEPT
-iptables -P FORWARD DROP
+iptables -P FORWARD ACCEPT
 
 # Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
 iptables -A INPUT -i lo -j ACCEPT
@@ -23,14 +23,6 @@ iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 # Permite el acceso a ssh
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
-# Permite el acceso a internet desde debian1
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-
-# Permite el tráfico saliente a internet desde debian1
-iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
-iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
-
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
@@ -38,7 +30,7 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i enp0s9 -o enp0s10 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s9 -j ACCEPT
 
-# Permite el tráfico de las subredes internas a Internet y al Host
+# Permite el tráfico de las subredes internas a Internet
 iptables -A FORWARD -i enp0s9 -o enp0s3 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s3 -j ACCEPT
 
@@ -50,6 +42,10 @@ iptables -A FORWARD -i enp0s8 -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
 iptables -A FORWARD -i enp0s8 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
 iptables -A FORWARD -i enp0s9 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
 iptables -A FORWARD -i enp0s10 -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+
+# Permite el acceso a internet desde debian1 (necesario para el servidor web)
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 
 # Permite que debian1 responda a los pings generados en la intranet, pero no a los generados desde la máquina Host
 iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
