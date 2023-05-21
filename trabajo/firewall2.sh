@@ -27,6 +27,10 @@ iptables -A INPUT -i enp0s8 -p icmp --icmp-type echo-request -j DROP
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 
+# Se permite el uso del puerto dns
+iptables -A FORWARD -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -p tcp --dport 53 -j ACCEPT
+
 # Se permite el trafico nuevo de las redes internas a internet
 iptables -A FORWARD -i enp0s9 -o enp0s8 -m state --state NEW -j ACCEPT
 iptables -A FORWARD -i enp0s10 -o enp0s8 -m state --state NEW -j ACCEPT
