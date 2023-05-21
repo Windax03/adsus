@@ -1,45 +1,61 @@
 #!/bin/bash
-# Script de configuración de iptables
-#
-if [ $EUID -ne 0 ];
-then 
-    echo -e "requieres de permisos de administracion o ser root\n\n"
+
+if [ "$UID" -ne 0 ]
+then
+    echo "El script necesita privilegios de admin"
     exit 1
 fi
 
-if [ ! -f /etc/iptables/rules.v4 ]; then iptables-save > /etc/iptables/rules.v4; fi
-if [ ! -f /etc/iptables/rules.v4.original ]; then cp /etc/iptables/rules.v4 /etc/iptables/rules.v4.original; fi
-
-# LIMPIEZA DE REGLAS EN IPTABLES
+# Limpiamos reglas existentes
 iptables -F
-iptables -X
-iptables -Z
 iptables -t nat -F
+iptables -t mangle -F
 
-# POLITICAS POR DEFECTO
+# Politicas por defecto
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 
-# INTRANET
-iptables -A OUTPUT -j ACCEPT                                                # Permitimos el flujo de paquetes de intranet a extranet.
+# Se da acceso a las tres redes internas
+iptables -t nat -A POSTROUTING -s 192.168.30.0/24 -o enp0s3 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.31.0/24 -o enp0s3 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.32.0/24 -o enp0s3 -j MASQUERADE
 
-# EXTRANET
-# HOST-ONLY NETWORK
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport ssh -j DNAT --to 192.168.32.2         # Redireccionaramos conexion ssh entrante del host al servidor ssh de Debian5.
-iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2          # Redireccionaramos conexion web entrante del host al servidor web Apache de Debian2.
-iptables -t nat -A POSTROUTING -o enp0s8 -j SNAT --to 192.168.56.2                          # Direccion IP origen de paquetes del Host = direccion publica del firewall.
-iptables -A INPUT -i enp0s8 -s 192.168.56.0/24 -p icmp --icmp-type echo-request -j DROP     # Restringimos el envio de paquetes desde ping al sistema intranet.
-iptables -A INPUT -i enp0s8 -j DROP                                                         # Restringimos el resto de trafico que no nos interesa.
+# Reglas para permitir tráfico local y tráfico relacionado con conexiones existentes
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-# INTERNET
-iptables -A INPUT -i enp0s3 -m state --state ESTABLISHED,RELATED -j ACCEPT  # Permitimos la vuelta del flujo de trafico al sistema intranet.
-iptables -t nat -A POSTROUTING -o enp0s3 -j SNAT --to 192.168.56.2          # Direccion IP origen de paquetes de NAT = direccion publica del firewall.
-iptables -A INPUT -i enp0s3 -j DROP                                         # Restringimos el resto de trafico que no nos interesa.
+# Permitir ping entre las máquinas Debian, pero no desde el Host
+iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A INPUT -i enp0s10 -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A INPUT -i enp0s8 -p icmp --icmp-type echo-request -j DROP
 
-iptables -A FORWARD -i enp0s3 -o enp0s8 -j DROP                             # Restringimos el flujo de paquetes desde NAT a Host-Only Network.
-iptables -A FORWARD -i enp0s8 -o enp0s3 -j DROP                             # Restringimos el flujo de paquetes desde Host-Only Network a NAT.
+# A todo lo que sale a la extranet se le proporciona la IP de debian1
+iptables -t nat -A POSTROUTING -o enp0s3 -j SNAT --to 192.168.56.2
+iptables -t nat -A POSTROUTING -o enp0s8 -j SNAT --to 192.168.56.2
 
-#iptables -L                                                                # Lista de reglas del firewall.
+# Redirección de peticiones desde el NAT al servidor web de Apache de debian2 y al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
+iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
 
-rm /etc/iptables/rules.v4
+# Redirección de peticiones desde el host al servidor web de Apache de debian2 y al servidor ssh de debian5
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.32.2:22
+iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
+
+# Se permite el paso del tráfico hacia la extranet (SSH y servidor web)
+iptables -A FORWARD -i enp0s3 -p all -j ACCEPT
+iptables -A FORWARD -i enp0s8 -p all -j ACCEPT
+
+# Se permite todo el paso hacia red interna 1 y red interna 2
+iptables -A FORWARD -i enp0s9 -p all -j ACCEPT
+iptables -A FORWARD -i enp0s10 -p all -j ACCEPT
+
+# Se permite el tráfico hacia debian5 por el puerto 22 (ssh) y hacia debian2 por el puerto 80
+iptables -A FORWARD -p tcp --dport 22 -d 192.168.32.2 -j ACCEPT
+iptables -A FORWARD -p tcp --dport 80 -d 192.168.30.2 -j ACCEPT
+
+# Permite que entre todo el tráfico de intranet
+iptables -A INPUT -i enp0s9 -p all -j ACCEPT
+iptables -A INPUT -i enp0s10 -p all -j ACCEPT
+
+# Preservación de las reglas iptables
 iptables-save > /etc/iptables/rules.v4
