@@ -48,7 +48,7 @@ iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 22 -j DNAT --to 192.168.3
 iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 80 -j DNAT --to 192.168.30.2:80
 
 # Habilita el NAT para que todas las máquinas debianX puedan acceder a Internet y a la red Host-Only usando la IP pública de debian1
-iptables -t nat -A POSTROUTING -o enp0s3 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o enp0s8 -j MASQUERADE
 
 # Preservación de las reglas iptables
 iptables-save > /etc/iptables/rules.v4
