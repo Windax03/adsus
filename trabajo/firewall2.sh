@@ -19,6 +19,11 @@ iptables -P FORWARD DROP
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 
+# Se da acceso a las tres redes internas
+iptables -t nat -A POSTROUTING -s 192.168.30.0/24 -o enp0s3 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.31.0/24 -o enp0s3 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.32.0/24 -o enp0s3 -j MASQUERADE
+
 # Permitir ping entre las máquinas Debian, pero no desde el Host
 iptables -A INPUT -i enp0s9 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -i enp0s10 -p icmp --icmp-type echo-request -j ACCEPT
@@ -26,6 +31,10 @@ iptables -A INPUT -i enp0s8 -p icmp --icmp-type echo-request -j DROP
 
 # Permite las respuestas de conexiones existentes (incluyendo pings) a ser reenviadas
 iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Se permite el trafico nuevo de las redes internas a internet
+iptables -A FORWARD -i enp0s9 -o enp0s8 -m state --state NEW -j ACCEPT
+iptables -A FORWARD -i enp0s10 -o enp0s8 -m state --state NEW -j ACCEPT
 
 # Permitir tráfico de las subredes internas a Internet y al Host
 iptables -A FORWARD -i enp0s9 -o enp0s8 -j ACCEPT
